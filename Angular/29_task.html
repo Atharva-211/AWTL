@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html ng-app="taskApp">
+<head>
+    <title>Task Management System</title>
+    <style>
+        /* styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 20px;
+}
+
+h1 {
+    color: #343a40;
+}
+
+form {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+}
+
+form div {
+    margin-bottom: 10px;
+}
+
+form input {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+form span {
+    color: #dc3545;
+    font-size: 12px;
+}
+
+form button {
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+form button:disabled {
+    background-color: #6c757d;
+}
+
+form button:hover:enabled {
+    background-color: #0056b3;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    width: 100%;
+    max-width: 600px;
+}
+
+li {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    padding: 20px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button {
+    background-color: #dc3545;
+    color: #ffffff;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #c82333;
+}
+
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script>
+        // app.js
+var app = angular.module('taskApp', []);
+
+app.controller('TaskController', function($scope) {
+    $scope.tasks = [];
+    $scope.newTask = {};
+
+    // Add a new task
+    $scope.addTask = function() {
+        if ($scope.taskForm.$valid) {
+            $scope.tasks.push(angular.copy($scope.newTask));
+            $scope.newTask = {};
+            $scope.taskForm.$setPristine();
+            $scope.taskForm.$setUntouched();
+        }
+    };
+
+    // Delete a task
+    $scope.deleteTask = function(task) {
+        var index = $scope.tasks.indexOf(task);
+        $scope.tasks.splice(index, 1);
+    };
+});
+
+    </script>
+</head>
+<body>
+    <div ng-controller="TaskController">
+        <h1>Task Management System</h1>
+
+        <!-- Task Form -->
+        <form name="taskForm" ng-submit="addTask()" novalidate>
+            <div>
+                <input type="text" name="title" ng-model="newTask.title" placeholder="Task Title" required>
+                <span ng-show="taskForm.title.$touched && taskForm.title.$invalid">Title is required.</span>
+            </div>
+            <div>
+                <input type="text" name="description" ng-model="newTask.description" placeholder="Task Description" required>
+                <span ng-show="taskForm.description.$touched && taskForm.description.$invalid">Description is required.</span>
+            </div>
+            <div>
+                <input type="date" name="dueDate" ng-model="newTask.dueDate" placeholder="Due Date" required>
+                <span ng-show="taskForm.dueDate.$touched && taskForm.dueDate.$invalid">Due Date is required.</span>
+            </div>
+            <button type="submit" ng-disabled="taskForm.$invalid">Add Task</button>
+        </form>
+
+        <!-- Task List -->
+        <h2>Tasks</h2>
+        <ul>
+            <li ng-repeat="task in tasks">
+                <h3>{{ task.title }}</h3>
+                <p><strong>Description:</strong> {{ task.description }}</p>
+                <p><strong>Due Date:</strong> {{ task.dueDate | date }}</p>
+                <button ng-click="deleteTask(task)">Delete</button>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>

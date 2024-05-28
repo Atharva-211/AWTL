@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stopwatch</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .stopwatch {
+            font-size: 48px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Stopwatch</h1>
+    <div class="stopwatch" id="stopwatch">00:00:00</div>
+    <div class="buttons">
+        <button id="start">Start</button>
+        <button id="stop">Stop</button>
+        <button id="reset">Reset</button>
+    </div>
+
+    <script>
+        let seconds = 0;
+        let intervalId = null;
+
+        document.getElementById('start').addEventListener('click', startStopwatch);
+        document.getElementById('stop').addEventListener('click', stopStopwatch);
+        document.getElementById('reset').addEventListener('click', resetStopwatch);
+
+        function startStopwatch() {
+            intervalId = setInterval(() => {
+                seconds++;
+                const time = formatTime(seconds);
+                document.getElementById('stopwatch').textContent = time;
+            }, 1000);
+        }
+
+        function stopStopwatch() {
+            clearInterval(intervalId);
+        }
+
+        function resetStopwatch() {
+            stopStopwatch();
+            seconds = 0;
+            document.getElementById('stopwatch').textContent = '00:00:00';
+        }
+
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secondsRemaining = seconds % 60;
+            return `${pad(hours)}:${pad(minutes)}:${pad(secondsRemaining)}`;
+        }
+
+        function pad(number) {
+            return (number < 10 ? '0' : '') + number;
+        }
+    </script>
+</body>
+</html>

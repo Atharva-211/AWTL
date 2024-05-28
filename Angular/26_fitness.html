@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fitness Tracker</title>
+    <!-- Include AngularJS from CDN -->
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script> -->
+    <script src="node_modules/angular/angular.min.js"></script>
+</head>
+<body ng-app="FitnessTrackerApp" ng-controller="MainController">
+    <div>
+        <h1>Fitness Tracker</h1>
+        <form ng-submit="addWorkout(newWorkout)">
+            <label>Workout Name:</label>
+            <input type="text" ng-model="newWorkout.name" required>
+            <label>Calories Burned:</label>
+            <input type="number" ng-model="newWorkout.calories" required>
+            <label>Steps:</label>
+            <input type="number" ng-model="newWorkout.steps" required>
+            <button type="submit">Add Workout</button>
+        </form>
+        <h2>Workouts:</h2>
+        <ul>
+            <li ng-repeat="workout in trackerData.workouts track by workout.id">
+                {{ workout.name }} - {{ workout.calories }} calories - {{ workout.steps }} steps
+            </li>
+        </ul>
+        <h2>Total Steps: {{ trackerData.steps }}</h2>
+        <h2>Total Calories Burned: {{ trackerData.calories }}</h2>
+        <button ng-click="clearLocalStorage()">Clear Data</button>
+    </div>
+
+    <script>
+        angular.module('FitnessTrackerApp', [])
+        .controller('MainController', function($scope) {
+            function loadLocalStorage() {
+                var data = localStorage.getItem('fitnessData');
+                if (data) {
+                    $scope.trackerData = JSON.parse(data);
+                } else {
+                    $scope.trackerData = {
+                        steps: 0,
+                        calories: 0,
+                        workouts: []
+                    };
+                }
+            }
+
+            function init() {
+                loadLocalStorage();
+            }
+
+            init();
+
+            $scope.addWorkout = function(workout) {
+                workout.id = Date.now(); // Assign a unique identifier
+                $scope.trackerData.workouts.push(workout);
+                $scope.trackerData.calories += workout.calories;
+                $scope.trackerData.steps += workout.steps;
+                updateLocalStorage($scope.trackerData);
+                $scope.newWorkout = {}; // Clear form after submission
+            };
+
+            function updateLocalStorage(data) {
+                localStorage.setItem('fitnessData', JSON.stringify(data));
+            }
+
+            $scope.clearLocalStorage = function() {
+                localStorage.clear();
+                loadLocalStorage();
+            };
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Color Guessing Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            color: #333;
+        }
+        #color-display {
+            font-size: 30px;
+            margin: 20px 0;
+        }
+        .color-box {
+            display: inline-block;
+            width: 100px;
+            height: 100px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <h1>Guess the Color!</h1>
+    <div id="color-display"></div>
+    <div id="color-boxes"></div>
+
+    <script>
+        const colors = generateRandomColors(6);
+        const correctColorIndex = Math.floor(Math.random() * colors.length);
+        const correctColor = colors[correctColorIndex];
+        const colorDisplay = document.getElementById('color-display');
+        const colorBoxes = document.getElementById('color-boxes');
+
+        colorDisplay.textContent = correctColor;
+
+        for (let i = 0; i < colors.length; i++) {
+            const colorBox = document.createElement('div');
+            colorBox.classList.add('color-box');
+            colorBox.style.backgroundColor = colors[i];
+            colorBox.addEventListener('click', function() {
+                if (i === correctColorIndex) {
+                    alert('Correct! You guessed the color.');
+                } else {
+                    alert('Incorrect. Try again!');
+                }
+            });
+            colorBoxes.appendChild(colorBox);
+        }
+
+        function generateRandomColors(num) {
+            const colorArray = [];
+            for (let i = 0; i < num; i++) {
+                colorArray.push(randomColor());
+            }
+            return colorArray;
+        }
+
+        function randomColor() {
+            const r = Math.floor(Math.random() * 256);
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,766 @@
+aggregate functions
+SELECT 
+    COUNT(*) AS total_rows,
+    SUM(salary) AS total_salary,
+    AVG(salary) AS average_salary,
+    MIN(salary) AS lowest_salary,
+    MAX(salary) AS highest_salary
+FROM employees;
+
+============================================================================
+
+Built-in functions
+-- Numeric functions
+SELECT ABS(-10) AS absolute_value,
+       CEIL(10.45) AS rounded_up,
+       FLOOR(10.45) AS rounded_down,
+       ROUND(10.456, 2) AS rounded_to_2_decimal_places,
+       SQRT(25) AS square_root;
+
+-- Date functions
+SELECT CURRENT_DATE AS current_date,
+       SYSDATE AS current_system_date,
+       DATE_ADD('2022-01-01', INTERVAL 1 YEAR) AS one_year_later,
+       DATE_SUB('2022-01-01', INTERVAL 1 MONTH) AS one_month_ago,
+       EXTRACT(YEAR FROM '2022-05-27') AS extracted_year;
+
+-- String functions
+SELECT CONCAT('Hello', ' ', 'World') AS concatenated_string,
+       UPPER('hello') AS uppercase_string,
+       LOWER('HELLO') AS lowercase_string,
+       LENGTH('Hello') AS string_length,
+       SUBSTRING('Hello World', 1, 5) AS substring;
+
+-- Set operations
+SELECT column1 FROM table1
+UNION
+SELECT column1 FROM table2;
+
+-- Sub-queries
+SELECT * FROM employees WHERE department_id = (SELECT department_id FROM departments WHERE department_name = 'Sales');
+
+-- Correlated sub-queries
+SELECT * FROM employees e WHERE salary > (SELECT AVG(salary) FROM employees WHERE e.department_id = department_id);
+
+-- Join
+SELECT e.*, d.department_name 
+FROM employees e
+JOIN departments d ON e.department_id = d.department_id;
+...............................
+SELECT 
+    e.*, 
+    d1.department_name AS department_name_inner,
+    d2.department_name AS department_name_left,
+    d3.department_name AS department_name_right,
+    d4.department_name AS department_name_full,
+    d5.department_name AS department_name_cross
+FROM 
+    employees e
+INNER JOIN 
+    departments d1 ON e.department_id = d1.department_id
+LEFT JOIN 
+    departments d2 ON e.department_id = d2.department_id
+RIGHT JOIN 
+    departments d3 ON e.department_id = d3.department_id
+FULL JOIN 
+    departments d4 ON e.department_id = d4.department_id
+CROSS JOIN 
+    departments d5;
+
+
+-- EXISTS
+SELECT * FROM employees e WHERE EXISTS (SELECT 1 FROM departments d WHERE e.department_id = d.department_id);
+
+-- ANY
+SELECT * FROM employees WHERE salary > ANY (SELECT salary FROM employees WHERE department_id = 1);
+
+-- ALL
+SELECT * FROM employees WHERE salary > ALL (SELECT salary FROM employees WHERE department_id = 1);
+
+-- Views and its types
+CREATE VIEW high_salary_employees AS SELECT * FROM employees WHERE salary > 50000;
+
+-- Transaction control commands
+BEGIN TRANSACTION;
+UPDATE accounts SET balance = balance - 100 WHERE account_number = 'sender_account';
+UPDATE accounts SET balance = balance + 100 WHERE account_number = 'recipient_account';
+COMMIT;
+
+==========================================================================================================================
+
+-- Stored Procedure
+CREATE OR REPLACE PROCEDURE get_employee_info (
+    p_employee_id IN NUMBER,
+    p_employee_name OUT VARCHAR2,
+    p_employee_salary OUT NUMBER
+)
+AS
+BEGIN
+    SELECT employee_name, salary INTO p_employee_name, p_employee_salary
+    FROM employees
+    WHERE employee_id = p_employee_id;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Employee not found.');
+END;
+/
+
+-- Stored Function
+CREATE OR REPLACE FUNCTION calculate_bonus (
+    p_salary IN NUMBER
+)
+RETURN NUMBER
+AS
+    v_bonus NUMBER;
+BEGIN
+    IF p_salary > 50000 THEN
+        v_bonus := p_salary * 0.1;
+    ELSE
+        v_bonus := p_salary * 0.05;
+    END IF;
+    
+    RETURN v_bonus;
+END;
+/
+
+-- Cursor
+CREATE OR REPLACE PROCEDURE display_employees
+IS
+    CURSOR employee_cursor IS
+        SELECT employee_id, employee_name, salary FROM employees;
+    v_employee_id employees.employee_id%TYPE;
+    v_employee_name employees.employee_name%TYPE;
+    v_salary employees.salary%TYPE;
+BEGIN
+    OPEN employee_cursor;
+    LOOP
+        FETCH employee_cursor INTO v_employee_id, v_employee_name, v_salary;
+        EXIT WHEN employee_cursor%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Employee ID: ' || v_employee_id || ', Name: ' || v_employee_name || ', Salary: ' || v_salary);
+    END LOOP;
+    CLOSE employee_cursor;
+END;
+/
+
+-- Database Trigger
+CREATE OR REPLACE TRIGGER employee_audit_trigger
+AFTER INSERT OR UPDATE OR DELETE ON employees
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO employee_audit_log (employee_id, action, action_date)
+        VALUES (:NEW.employee_id, 'INSERT', SYSDATE);
+    ELSIF UPDATING THEN
+        INSERT INTO employee_audit_log (employee_id, action, action_date)
+        VALUES (:NEW.employee_id, 'UPDATE', SYSDATE);
+    ELSIF DELETING THEN
+        INSERT INTO employee_audit_log (employee_id, action, action_date)
+        VALUES (:OLD.employee_id, 'DELETE', SYSDATE);
+    END IF;
+END;
+/
+
+
+
+
+
+****************************************************************************************************************************************
+
+teaminfo (id, name, country, estYear)
+matchinfo (id, location, startTime, endTime, matchDate, teamId, oppositionTeamId, wonTeamId, umpireName, type)
+playerinfo (id, name, birthdate, joinedYear, retirementYear, playerRuns, playerWickets)
+matchplayedplayerinfo (matchid, teamid, playerid, playingAs)
+
+1 List names of the umpire when Indian team won 
+2 List names of the players who have not played single match. 
+3 Find batsman scored maximum runs and batsman scored minimum runs and display their names 
+4 Find bowler who has taken maximum wickets and bowler taken minimum wickets and display their names 
+5 List name of all players for given country and number of matches he has played 
+6 List names of the countries who played matches on given location 
+7 List team name and location of the matches they played 
+8 List names of teams who have never played any matches 
+9 List names of the countries and total matches they played 
+10 List name of team, and name of teams against which they played matches and count they won
+
+
+( 1 )
+SELECT umpireName
+FROM matchinfo
+WHERE wonTeamId = 1;
+
+( 2 )
+SELECT p.name 
+FROM playerinfo p
+LEFT JOIN matchplayedplayerinfo mp ON p.id = mp.playerid
+WHERE mp.playerid IS NULL;
+
+
+( 3 )
+SELECT name, playerRuns
+    FROM playerinfo
+    WHERE playerRuns = (SELECT MAX(playerRuns) FROM playerinfo)
+    OR playerRuns = (SELECT MIN(playerRuns) FROM playerinfo);
+
+( 4 )
+SELECT name, playerWickets
+    FROM playerinfo
+    WHERE playerWickets = (SELECT MAX(playerWickets) FROM playerinfo)
+    OR playerWickets = (SELECT MIN(playerWickets) FROM playerinfo);
+
+( 5 )
+SELECT playerinfo.name, COUNT(matchplayedplayerinfo.playerid) matches_played
+FROM matchplayedplayerinfo
+JOIN playerinfo ON matchplayedplayerinfo.playerid = playerinfo.id
+WHERE matchplayedplayerinfo.teamid = 1
+GROUP BY matchplayedplayerinfo.playerid;
+
+( 6 )
+SELECT country
+FROM teaminfo
+WHERE id IN ( SELECT teamId FROM matchinfo WHERE location = 'Wankhede Stadium'
+UNION 
+SELECT oppositionTeamId FROM matchinfo WHERE location = 'Wankhede Stadium');
+
+( 7 )
+SELECT teaminfo.name, matchinfo.location
+FROM teaminfo
+JOIN matchinfo ON teaminfo.id = matchinfo.teamId OR teaminfo.id = matchinfo.oppositionTeamId;
+
+( 8 )
+SELECT t.name
+FROM teaminfo t
+LEFT JOIN matchinfo m1 ON t.id = m1.teamId
+LEFT JOIN matchinfo m2 ON t.id = m2.oppositionTeamId
+WHERE m1.teamId IS NULL AND m2.oppositionTeamId IS NULL;
+
+OR
+
+SELECT name
+FROM teaminfo
+WHERE id NOT IN (SELECT DISTINCT teamId FROM matchinfo UNION SELECT DISTINCT oppositionTeamId FROM matchinfo);
+
+( 9 )
+SELECT teaminfo.country, COUNT(*) TotalMatchesPlayed
+FROM matchinfo
+JOIN teaminfo ON matchinfo.teamId = teaminfo.id OR matchinfo.oppositionTeamId = teaminfo.id
+GROUP BY teaminfo.country;
+
+( 10 )
+SELECT t1.name AS team_name, t2.name AS opposition_team_name, COUNT(m.id) AS matches_won
+FROM teaminfo t1
+JOIN matchinfo m ON t1.id = m.teamId OR t1.id = m.oppositionTeamId
+JOIN teaminfo t2 ON (t2.id = m.oppositionTeamId AND t1.id = m.teamId) OR (t2.id = m.teamId AND t1.id = m.oppositionTeamId)
+WHERE t1.id = m.wonTeamId
+GROUP BY t1.name, t2.name;
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+Student (studentid , studentname,instructorid,studentcity)
+Instructor (instructorid,Instructorname,instructorcity,specialization)
+
+5) Create a view containing total number of students whose instructor belongs to “Pune”.
+CREATE VIEW Students_In_Pune AS
+SELECT COUNT(Student.studentid) AS Total_Students_In_Pune
+FROM Student
+JOIN Instructor ON Student.instructorid = Instructor.instructorid
+WHERE Instructor.instructorcity = 'Pune';
+...........................................................................................................................................
+
+1.	Find all employees who locate in the location with the id 1700
+2.	 Find all employees who do not locate at the location 1700
+3.	Finds the employees who have the highest salary
+4.	Finds all employees who salaries are greater than the average salary of all employees
+5.	Finds all departments which have at least one employee with the salary is greater than 10,000
+6.	Finds all departments that do not have any employee with the salary greater than 10,000
+7.	Finds all employees whose salaries are greater than the lowest salary of every department
+8.	Finds all employees whose salaries are greater than or equal to the highest salary of every department
+9.	Finds the salaries of all employees, their average salary, and the difference between the salary of each employee and the average salary
+
+
+(   1. )
+SELECT *
+    -> FROM employees
+    -> WHERE department_id IN (SELECT department_id FROM departments WHERE location_id = 1700);
+
+(   2. )
+SELECT *
+    -> FROM employees
+    -> WHERE department_id NOT IN (SELECT department_id FROM departments WHERE location_id = 1700);
+
+(   3. )
+SELECT *
+    -> FROM employees
+    -> WHERE salary = (SELECT MAX(salary) FROM employees);
+
+(   4. )
+SELECT *
+    -> FROM employees
+    -> WHERE salary > (SELECT AVG(salary) FROM employees);
+
+(   5. )
+SELECT *
+    -> FROM departments
+    -> WHERE department_id IN (SELECT department_id FROM employees WHERE salary > 10000);
+
+(   6. )
+SELECT *
+    -> FROM departments
+    -> WHERE department_id NOT IN (SELECT department_id FROM employees WHERE salary > 10000);
+
+(   7. )
+SELECT *
+    -> FROM employees e
+    -> WHERE salary > (SELECT MIN(salary) FROM employees WHERE department_id = e.department_id);
+
+(   8. )
+SELECT *
+    -> FROM employees e
+    -> WHERE salary >= (SELECT MAX(salary) FROM employees WHERE department_id = e.department_id);
+
+(   9. )
+SELECT e.employee_id, e.salary, AVG(e2.salary) AS average_salary, e.salary - AVG(e2.salary) AS salary_difference
+    -> FROM employees e
+    -> CROSS JOIN employees e2
+    -> GROUP BY e.employee_id, e.salary;
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+employee(empno , empname, designation, city, salary, zipcode, county)
+
+1.Creates a sequence used to generate employee numbers for the empno column of the emp table.
+2.Create an Index on county.
+3.Find the zipcode whose county = 071 and check whether the query uses the Index and write your observation.
+4.Create a view for employees having salary < 50000 and stays in ‘Mumbai’
+
+(   1. )
+CREATE SEQUENCE empno_seq
+START WITH 1
+INCREMENT BY 1
+NOCACHE
+NOCYCLE;
+
+(   2. )
+CREATE INDEX idx_county ON employee(county);
+
+(   3. )
+SELECT zipcode
+FROM employee
+WHERE county = '071';
+
+(   4. )
+CREATE VIEW low_salary_mumbai_employees AS
+SELECT *
+FROM employee
+WHERE salary < 50000 AND city = 'Mumbai';
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+4. Borrower(Rollin, Name, DateofIssue, NameofBook, Status) & Fine(Roll_no,Date,Amt)
+
+1.Write a PL/SQL block to accept input for Borrower table.
+2.Write a PL/SQL block using control structures to calculate fine by using the following rules:
+	a.check the number of days (from date of issue), if days are between 15 to 30 then fine amount will be Rs 5per day
+	b.If no. of days>30, per day fine will be Rs 50 per day
+	c.for days less than 30, Rs. 5 per day.
+
+2.After submitting the book, status will change from I to R. If condition of fine is true, then details will be stored into fine table.
+
+(   1. )
+DECLARE
+    v_rollin VARCHAR2(50);
+    v_name VARCHAR2(100);
+    v_date_of_issue DATE;
+    v_name_of_book VARCHAR2(100);
+    v_status CHAR(1);
+BEGIN
+    -- Accept input
+    v_rollin := '&Enter_Rollin';
+    v_name := '&Enter_Name';
+    v_date_of_issue := TO_DATE('&Enter_Date_of_Issue', 'YYYY-MM-DD');
+    v_name_of_book := '&Enter_Name_of_Book';
+    v_status := '&Enter_Status';
+    
+    -- Insert into Borrower table
+    INSERT INTO Borrower (Rollin, Name, DateofIssue, NameofBook, Status)
+    VALUES (v_rollin, v_name, v_date_of_issue, v_name_of_book, v_status);
+    
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Data inserted successfully.');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END;
+
+(   2. )
+DECLARE
+    v_roll_no Borrower.Rollin%TYPE;
+    v_date_of_issue Borrower.DateofIssue%TYPE;
+    v_days_late NUMBER;
+    v_fine_amt NUMBER := 0;
+BEGIN
+    -- Retrieve roll number and date of issue
+    SELECT Rollin, DateofIssue
+    INTO v_roll_no, v_date_of_issue
+    FROM Borrower
+    WHERE Status = 'I'; -- Assuming 'I' represents book is issued
+    
+    -- Calculate days late
+    v_days_late := TRUNC(SYSDATE) - v_date_of_issue;
+    
+    -- Calculate fine amount
+    IF v_days_late BETWEEN 15 AND 30 THEN
+        v_fine_amt := 5 * v_days_late;
+    ELSIF v_days_late > 30 THEN
+        v_fine_amt := 50 * v_days_late;
+    END IF;
+    
+    -- Insert into Fine table if fine is applicable
+    IF v_fine_amt > 0 THEN
+        INSERT INTO Fine (Roll_no, Date, Amt)
+        VALUES (v_roll_no, SYSDATE, v_fine_amt);
+        COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Fine details stored successfully.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('No fine applicable.');
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No records found in Borrower table.');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+O_Roll(Rollno,Name,DOB,Phone,address)
+N_Roll(Rollno,Name,DOB,Phone,address)
+Write a PL/SQL block using various types of cursor(implicit,Explicit,For, Parameterized) to merge
+records from O_Roll table with that of N_Roll in such a way duplicate records are to be eliminated. mysql> create database assig3_5;
+
+-- Create a database in MySQL
+CREATE DATABASE assig3_5;
+
+-- PL/SQL block to merge records
+DECLARE
+    -- Implicit Cursor
+    CURSOR c_implicit IS
+        SELECT *
+        FROM O_Roll;
+    
+    -- Explicit Cursor
+    CURSOR c_explicit IS
+        SELECT *
+        FROM N_Roll;
+    
+    -- Cursor with FOR loop
+    CURSOR c_for IS
+        SELECT *
+        FROM O_Roll;
+    
+    -- Parameterized Cursor
+    CURSOR c_param (p_rollno NUMBER) IS
+        SELECT *
+        FROM O_Roll
+        WHERE Rollno = p_rollno;
+    
+    v_o_rollno O_Roll.Rollno%TYPE;
+    v_o_name O_Roll.Name%TYPE;
+    v_o_dob O_Roll.DOB%TYPE;
+    v_o_phone O_Roll.Phone%TYPE;
+    v_o_address O_Roll.Address%TYPE;
+    
+    v_n_rollno N_Roll.Rollno%TYPE;
+    v_n_name N_Roll.Name%TYPE;
+    v_n_dob N_Roll.DOB%TYPE;
+    v_n_phone N_Roll.Phone%TYPE;
+    v_n_address N_Roll.Address%TYPE;
+    
+    v_exists BOOLEAN := FALSE;
+BEGIN
+    -- Open and process the explicit cursor
+    OPEN c_explicit;
+    LOOP
+        FETCH c_explicit INTO v_n_rollno, v_n_name, v_n_dob, v_n_phone, v_n_address;
+        EXIT WHEN c_explicit%NOTFOUND;
+        
+        -- Check if the record exists in O_Roll
+        SELECT COUNT(*)
+        INTO v_exists
+        FROM O_Roll
+        WHERE Rollno = v_n_rollno;
+        
+        IF v_exists = 0 THEN
+            -- Insert the record into O_Roll
+            INSERT INTO O_Roll (Rollno, Name, DOB, Phone, Address)
+            VALUES (v_n_rollno, v_n_name, v_n_dob, v_n_phone, v_n_address);
+        END IF;
+    END LOOP;
+    CLOSE c_explicit;
+    
+    -- Open and process the cursor with FOR loop
+    FOR rec IN c_for LOOP
+        -- Check if the record exists in N_Roll
+        SELECT COUNT(*)
+        INTO v_exists
+        FROM N_Roll
+        WHERE Rollno = rec.Rollno;
+        
+        IF v_exists = 0 THEN
+            -- Insert the record into N_Roll
+            INSERT INTO N_Roll (Rollno, Name, DOB, Phone, Address)
+            VALUES (rec.Rollno, rec.Name, rec.DOB, rec.Phone, rec.Address);
+        END IF;
+    END LOOP;
+    
+    -- Open and process the parameterized cursor
+    OPEN c_implicit;
+    LOOP
+        FETCH c_implicit INTO v_o_rollno, v_o_name, v_o_dob, v_o_phone, v_o_address;
+        EXIT WHEN c_implicit%NOTFOUND;
+        
+        -- Check if the record exists in N_Roll
+        SELECT COUNT(*)
+        INTO v_exists
+        FROM N_Roll
+        WHERE Rollno = v_o_rollno;
+        
+        IF v_exists = 0 THEN
+            -- Insert the record into N_Roll
+            INSERT INTO N_Roll (Rollno, Name, DOB, Phone, Address)
+            VALUES (v_o_rollno, v_o_name, v_o_dob, v_o_phone, v_o_address);
+        END IF;
+    END LOOP;
+    CLOSE c_implicit;
+    
+    -- Open and process the parameterized cursor
+    OPEN c_param(123); -- Example of using a parameter
+    LOOP
+        FETCH c_param INTO v_o_rollno, v_o_name, v_o_dob, v_o_phone, v_o_address;
+        EXIT WHEN c_param%NOTFOUND;
+        
+        -- Check if the record exists in N_Roll
+        SELECT COUNT(*)
+        INTO v_exists
+        FROM N_Roll
+        WHERE Rollno = v_o_rollno;
+        
+        IF v_exists = 0 THEN
+            -- Insert the record into N_Roll
+            INSERT INTO N_Roll (Rollno, Name, DOB, Phone, Address)
+            VALUES (v_o_rollno, v_o_name, v_o_dob, v_o_phone, v_o_address);
+        END IF;
+    END LOOP;
+    CLOSE c_param;
+    
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Records merged successfully.');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+        ROLLBACK;
+END;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Books(AccNo,Title,Author,Publisher,Count).
+a. Create a table Library_Audit with same fiels as of Books.
+b. Create a before trigger to insert records into Librry_Audit table if there is deletion in Books table.
+c. Create a after trigger to insert records into Librry_Audit table if there is updation in Books table.
+
+(   b. )
+CREATE OR REPLACE TRIGGER before_delete_books
+BEFORE DELETE ON Books
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (AccNo, Title, Author, Publisher, Count)
+    VALUES (:OLD.AccNo, :OLD.Title, :OLD.Author, :OLD.Publisher, :OLD.Count);
+END;
+/
+
+(   c. )
+CREATE OR REPLACE TRIGGER after_update_books
+AFTER UPDATE ON Books
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (AccNo, Title, Author, Publisher, Count)
+    VALUES (:NEW.AccNo, :NEW.Title, :NEW.Author, :NEW.Publisher, :NEW.Count);
+END;
+/
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+7. Create a procedure called USER_QUERY_EMP that accepts three parameters. Parameter p_myeno
+is of IN parameter mode which provides the empno value. The other two parameters p_myjob and
+p_mysal are of OUT mode. The procedure retrieves the salary and job of an employee with the
+provided employee number and assigns those to the two OUT parameters respectively. The
+procedure should handle the error if the empno does not exist in the EMP table by displaying an
+appropriate message. Use bind variables for the two OUT Parameters. Compile the code, invoke
+the procedure, and display the salary and job title for employee number 7839. Do the same for
+employee number 7123.
+
+(   1. )
+create the procedure USER_QUERY_EMP and perform the specified tasks in Oracle PL/SQL:
+CREATE OR REPLACE PROCEDURE USER_QUERY_EMP(
+    p_myeno IN EMP.EMPNO%TYPE,
+    p_myjob OUT EMP.JOB%TYPE,
+    p_mysal OUT EMP.SAL%TYPE
+)
+AS
+BEGIN
+    SELECT JOB, SAL
+    INTO p_myjob, p_mysal
+    FROM EMP
+    WHERE EMPNO = p_myeno;
+
+    -- If no employee found, raise an exception
+    IF p_myjob IS NULL THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Employee not found.');
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Employee with EMPNO ' || p_myeno || ' not found.');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END;
+/
+
+(   2. )
+invoke the procedure and display the salary and job title for employee numbers 7839 and 7123:
+DECLARE
+    v_job EMP.JOB%TYPE;
+    v_sal EMP.SAL%TYPE;
+BEGIN
+    -- Call the procedure for employee number 7839
+    USER_QUERY_EMP(7839, v_job, v_sal);
+    DBMS_OUTPUT.PUT_LINE('Employee 7839 - Job: ' || v_job || ', Salary: ' || v_sal);
+
+    -- Call the procedure for employee number 7123
+    USER_QUERY_EMP(7123, v_job, v_sal);
+    DBMS_OUTPUT.PUT_LINE('Employee 7123 - Job: ' || v_job || ', Salary: ' || v_sal);
+END;
+/
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+8. Create a function named USER_ANNUAL_COMP that has three parameters p_eno, p_sal
+and p_comm for passing on the values of an employee number, the current salary and
+commission of the employee respectively. The function calculates and returns the annual
+compensation of the employee by using the following formula. annual_compensation =
+(p_sal+p_comm)*12 If the salary or commission value is NULL then zero should be substituted
+for it. Give a call to USER_ANNUAL_COMP from a SELECT statement, against the EMP
+table.
+
+CREATE OR REPLACE FUNCTION USER_ANNUAL_COMP(
+    p_eno IN EMP.EMPNO%TYPE,
+    p_sal IN EMP.SAL%TYPE DEFAULT NULL,
+    p_comm IN EMP.COMM%TYPE DEFAULT NULL
+)
+RETURN NUMBER
+AS
+    v_annual_comp NUMBER;
+BEGIN
+    -- Replace NULL values with zero
+    IF p_sal IS NULL THEN
+        p_sal := 0;
+    END IF;
+
+    IF p_comm IS NULL THEN
+        p_comm := 0;
+    END IF;
+
+    -- Calculate annual compensation
+    v_annual_comp := (p_sal + p_comm) * 12;
+
+    RETURN v_annual_comp;
+END;
+/
+
+SELECT EMPNO, ENAME, USER_ANNUAL_COMP(EMPNO, SAL, COMM) AS ANNUAL_COMPENSATION
+FROM EMP;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+9. Create a function named USER_VALID_DEPTNO that has a single parameter p_dno to
+accept a department number and returns a BOOLEAN value. The function returns TRUE if the
+department number exists in the DEPT table else it returns FALSE
+
+DECLARE
+    v_result BOOLEAN;
+BEGIN
+    v_result := USER_VALID_DEPTNO(20);
+    IF v_result THEN
+        DBMS_OUTPUT.PUT_LINE('Department number is valid.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Department number is not valid.');
+    END IF;
+END;
+/
+
+SELECT DEPTNO,
+       USER_VALID_DEPTNO(DEPTNO) AS IS_VALID
+FROM DEPT;
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+10. Create a table named salaryLog with the appropriate columns and insert the empno, new
+grade, old salary and new salary values in salaryLog table if the grade of an employee
+changes. Create a trigger named TR_CHECK_GRADE that will be fired when a user modifies
+the EMP table. It will check whether the grade has changed by making use of the SALGRADE
+table. (Grade is dependent on Salary.) If grade is changed, the trigger will log the
+corresponding employee number, old salary, new salary and new grade into salaryLog table.
+Test the working of the trigger by firing an appropriate DML query.
+
+(   1. )
+Create the trigger TR_CHECK_GRADE:
+CREATE OR REPLACE TRIGGER TR_CHECK_GRADE
+BEFORE UPDATE OF GRADE ON EMP
+FOR EACH ROW
+DECLARE
+    v_old_grade SALGRADE.GRADE%TYPE;
+    v_new_grade SALGRADE.GRADE%TYPE;
+    v_old_salary EMP.SAL%TYPE;
+    v_new_salary EMP.SAL%TYPE;
+BEGIN
+    -- Retrieve old and new grades based on old and new salaries
+    SELECT GRADE
+    INTO v_old_grade
+    FROM SALGRADE
+    WHERE :OLD.SAL BETWEEN LOSAL AND HISAL;
+
+    SELECT GRADE
+    INTO v_new_grade
+    FROM SALGRADE
+    WHERE :NEW.SAL BETWEEN LOSAL AND HISAL;
+
+    -- If old and new grades are different, log the changes into salaryLog table
+    IF v_old_grade != v_new_grade THEN
+        SELECT SAL
+        INTO v_old_salary
+        FROM EMP
+        WHERE EMPNO = :OLD.EMPNO;
+
+        SELECT SAL
+        INTO v_new_salary
+        FROM EMP
+        WHERE EMPNO = :NEW.EMPNO;
+
+        INSERT INTO salaryLog (empno, old_grade, new_grade, old_salary, new_salary)
+        VALUES (:OLD.EMPNO, v_old_grade, v_new_grade, v_old_salary, v_new_salary);
+    END IF;
+END;
+/
+
+(   2. )
+UPDATE EMP
+SET SAL = 2500
+WHERE EMPNO = 7839;
+
+
+
+****************************************************************************************************************************************

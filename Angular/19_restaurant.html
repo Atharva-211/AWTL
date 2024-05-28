@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Restaurant Menu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        nav li {
+            margin: 0 10px;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .menu {
+            padding: 40px;
+        }
+        .menu h2 {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #ccc;
+        }
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        .menu-item .name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .menu-item .price {
+            font-size: 16px;
+            color: #666;
+        }
+        .menu-item .description {
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Restaurant Name</h1>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Menu</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="menu">
+            <h2>Our Menu</h2>
+            <div class="menu-item">
+                <div class="name">Burger</div>
+                <div class="price">$10.99</div>
+                <div class="description">Juicy beef burger with lettuce, tomato, and cheese</div>
+            </div>
+            <div class="menu-item">
+                <div class="name">Salad</div>
+                <div class="price">$8.99</div>
+                <div class="description">Fresh mixed greens with cherry tomatoes and balsamic vinaigrette</div>
+            </div>
+            <div class="menu-item">
+                <div class="name">Pizza</div>
+                <div class="price">$12.99</div>
+                <div class="description">Wood-fired pizza with mozzarella, pepperoni, and basil</div>
+            </div>
+            <!-- Add more menu items as needed -->
+        </section>
+    </main>
+    <footer>
+        &copy; 2023 Restaurant Name. All rights reserved.
+    </footer>
+</body>
+</html>

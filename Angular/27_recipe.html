@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html ng-app="recipeApp">
+<head>
+    <title>Recipe Management System</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+   <style>
+    /* styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+h1 {
+    color: #343a40;
+}
+
+h2 {
+    color: #495057;
+}
+
+form {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+form input, form textarea, form button {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+form button {
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+form button:hover {
+    background-color: #0056b3;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    padding: 20px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button {
+    background-color: #dc3545;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    margin-right: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #c82333;
+}
+
+.edit-button {
+    background-color: #ffc107;
+}
+
+.edit-button:hover {
+    background-color: #e0a800;
+}
+
+#editForm {
+    margin-top: 20px;
+}
+
+   </style>
+   
+    <script>
+        // app.js
+var app = angular.module('recipeApp', []);
+
+app.controller('RecipeController', function($scope) {
+    $scope.recipes = [];
+    $scope.newRecipe = {};
+    $scope.editing = false;
+    $scope.selectedRecipe = {};
+
+    $scope.addRecipe = function() {
+        $scope.recipes.push(angular.copy($scope.newRecipe));
+        $scope.newRecipe = {};
+    };
+
+    $scope.deleteRecipe = function(recipe) {
+        var index = $scope.recipes.indexOf(recipe);
+        $scope.recipes.splice(index, 1);
+    };
+
+    $scope.editRecipe = function(recipe) {
+        $scope.editing = true;
+        $scope.selectedRecipe = angular.copy(recipe);
+        $scope.originalRecipe = recipe;
+    };
+
+    $scope.updateRecipe = function() {
+        var index = $scope.recipes.indexOf($scope.originalRecipe);
+        $scope.recipes[index] = angular.copy($scope.selectedRecipe);
+        $scope.cancelEdit();
+    };
+
+    $scope.cancelEdit = function() {
+        $scope.editing = false;
+        $scope.selectedRecipe = {};
+        $scope.originalRecipe = {};
+    };
+});
+
+    </script>
+</head>
+<body>
+    <div ng-controller="RecipeController">
+        <h1>Recipe Management System</h1>
+
+        <form ng-submit="addRecipe()">
+            <input type="text" ng-model="newRecipe.name" placeholder="Recipe Name" required>
+            <textarea ng-model="newRecipe.ingredients" placeholder="Ingredients" required></textarea>
+            <textarea ng-model="newRecipe.instructions" placeholder="Instructions" required></textarea>
+            <button type="submit">Add Recipe</button>
+        </form>
+
+        <h2>Recipes</h2>
+        <ul>
+            <li ng-repeat="recipe in recipes">
+                <h3>{{ recipe.name }}</h3>
+                <p><strong>Ingredients:</strong></p>
+                <p>{{ recipe.ingredients }}</p>
+                <p><strong>Instructions:</strong></p>
+                <p>{{ recipe.instructions }}</p>
+                <button class="edit-button" ng-click="editRecipe(recipe)">Edit</button>
+                <button ng-click="deleteRecipe(recipe)">Delete</button>
+            </li>
+        </ul>
+
+        <div ng-show="editing" id="editForm">
+            <h2>Edit Recipe</h2>
+            <form ng-submit="updateRecipe()">
+                <input type="text" ng-model="selectedRecipe.name" placeholder="Recipe Name" required>
+                <textarea ng-model="selectedRecipe.ingredients" placeholder="Ingredients" required></textarea>
+                <textarea ng-model="selectedRecipe.instructions" placeholder="Instructions" required></textarea>
+                <button type="submit">Update Recipe</button>
+                <button type="button" ng-click="cancelEdit()">Cancel</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

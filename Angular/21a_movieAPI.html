@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="movieApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Movie Database</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        li {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        
+        h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+        
+        p {
+            margin: 5px 0;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script>
+        var app = angular.module('movieApp', []);
+    </script>
+    <script>
+        app.controller('MovieController', function($scope, MovieService) {
+            $scope.searchQuery = '';
+            $scope.movies = [];
+        
+            $scope.searchMovies = function() {
+                if ($scope.searchQuery.length > 2) {
+                    MovieService.searchMovies($scope.searchQuery).then(function(response) {
+                        $scope.movies = response.data.Search;
+                    }, function(error) {
+                        console.error('Error fetching movies', error);
+                    });
+                }
+            };
+        });
+    </script>
+    <script>
+        app.factory('MovieService', function($http) {
+            var apiUrl = 'https://www.omdbapi.com/';
+            var apiKey = 'b3fbc5cb';
+        
+            return {
+                searchMovies: function(query) {
+                    return $http.get(apiUrl, {
+                        params: {
+                            s: query,
+                            apikey: apiKey
+                        }
+                    });
+                }
+            };
+        });
+    </script>
+</head>
+<body ng-controller="MovieController">
+    <div class="container">
+        <h1>Movie Database</h1>
+        <input type="text" ng-model="searchQuery" placeholder="Search for movies..." ng-change="searchMovies()">
+        <ul>
+            <li ng-repeat="movie in movies">
+                <h2>{{ movie.Title }}</h2>
+                <p>{{ movie.Year }}</p>
+                <p>{{ movie.Plot }}</p>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="blogApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Application</title>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script> -->
+    <script src="node_modules/angular/angular.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .post {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body ng-controller="BlogController" class="container">
+
+    <h1>Blog</h1>
+
+    <div ng-repeat="post in posts" class="post">
+        <h2>{{ post.title }}</h2>
+        <p>{{ post.body }}</p>
+        <p>Posted by: {{ post.author }}</p>
+    </div>
+
+    <h2>Create New Post</h2>
+
+    <form ng-submit="createPost()">
+        <label for="title">Title:</label><br>
+        <input type="text" id="title" ng-model="newPost.title" required><br>
+        <label for="body">Body:</label><br>
+        <textarea id="body" ng-model="newPost.body" required></textarea><br>
+        <label for="author">Author:</label><br>
+        <input type="text" id="author" ng-model="newPost.author" required><br>
+        <button type="submit">Create Post</button>
+    </form>
+
+    <script>
+        angular.module('blogApp', [])
+        .controller('BlogController', function($scope) {
+            $scope.posts = [];
+
+            $scope.createPost = function() {
+                $scope.posts.push({
+                    title: $scope.newPost.title,
+                    body: $scope.newPost.body,
+                    author: $scope.newPost.author
+                });
+
+                // Clear the form fields after submission
+                $scope.newPost = {};
+            };
+        });
+    </script>
+
+</body>
+</html>

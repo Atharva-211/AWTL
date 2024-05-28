@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html ng-app="libraryApp">
+<head>
+    <title>Library Management System</title>
+   <style>
+    /* styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+h1 {
+    color: #343a40;
+}
+
+h2 {
+    color: #495057;
+}
+
+form {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+form input, form button {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+form button {
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+form button:hover {
+    background-color: #0056b3;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    padding: 20px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button {
+    background-color: #dc3545;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    margin-right: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #c82333;
+}
+
+.edit-button {
+    background-color: #ffc107;
+}
+
+.edit-button:hover {
+    background-color: #e0a800;
+}
+
+#editForm {
+    margin-top: 20px;
+}
+
+   </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script>
+        // app.js
+var app = angular.module('libraryApp', []);
+
+app.controller('LibraryController', function($scope) {
+    $scope.books = [];
+    $scope.members = [];
+    $scope.borrowRecords = [];
+    $scope.newBook = {};
+    $scope.newMember = {};
+    $scope.borrow = {};
+    $scope.editingBook = false;
+    $scope.editingMember = false;
+    $scope.selectedBook = {};
+    $scope.selectedMember = {};
+
+    // Book Management
+    $scope.addBook = function() {
+        $scope.books.push(angular.copy($scope.newBook));
+        $scope.newBook = {};
+    };
+
+    $scope.deleteBook = function(book) {
+        var index = $scope.books.indexOf(book);
+        $scope.books.splice(index, 1);
+    };
+
+    $scope.editBook = function(book) {
+        $scope.editingBook = true;
+        $scope.selectedBook = angular.copy(book);
+        $scope.originalBook = book;
+    };
+
+    $scope.updateBook = function() {
+        var index = $scope.books.indexOf($scope.originalBook);
+        $scope.books[index] = angular.copy($scope.selectedBook);
+        $scope.cancelEditBook();
+    };
+
+    $scope.cancelEditBook = function() {
+        $scope.editingBook = false;
+        $scope.selectedBook = {};
+        $scope.originalBook = {};
+    };
+
+    // Member Management
+    $scope.addMember = function() {
+        $scope.members.push(angular.copy($scope.newMember));
+        $scope.newMember = {};
+    };
+
+    $scope.deleteMember = function(member) {
+        var index = $scope.members.indexOf(member);
+        $scope.members.splice(index, 1);
+    };
+
+    $scope.editMember = function(member) {
+        $scope.editingMember = true;
+        $scope.selectedMember = angular.copy(member);
+        $scope.originalMember = member;
+    };
+
+    $scope.updateMember = function() {
+        var index = $scope.members.indexOf($scope.originalMember);
+        $scope.members[index] = angular.copy($scope.selectedMember);
+        $scope.cancelEditMember();
+    };
+
+    $scope.cancelEditMember = function() {
+        $scope.editingMember = false;
+        $scope.selectedMember = {};
+        $scope.originalMember = {};
+    };
+
+    // Borrow/Return Management
+    $scope.borrowBook = function() {
+        $scope.borrowRecords.push({
+            book: $scope.borrow.book,
+            member: $scope.borrow.member
+        });
+        $scope.borrow = {};
+    };
+
+    $scope.returnBook = function(entry) {
+        var index = $scope.borrowRecords.indexOf(entry);
+        $scope.borrowRecords.splice(index, 1);
+    };
+});
+
+    </script>
+</head>
+<body>
+    <div ng-controller="LibraryController">
+        <h1>Library Management System</h1>
+        
+        <!-- Book Management -->
+        <h2>Books</h2>
+        <form ng-submit="addBook()">
+            <input type="text" ng-model="newBook.title" placeholder="Book Title" required>
+            <input type="text" ng-model="newBook.author" placeholder="Author" required>
+            <input type="number" ng-model="newBook.year" placeholder="Year" required>
+            <button type="submit">Add Book</button>
+        </form>
+        <ul>
+            <li ng-repeat="book in books">
+                <h3>{{ book.title }}</h3>
+                <p><strong>Author:</strong> {{ book.author }}</p>
+                <p><strong>Year:</strong> {{ book.year }}</p>
+                <button class="edit-button" ng-click="editBook(book)">Edit</button>
+                <button ng-click="deleteBook(book)">Delete</button>
+            </li>
+        </ul>
+
+        <!-- Member Management -->
+        <h2>Members</h2>
+        <form ng-submit="addMember()">
+            <input type="text" ng-model="newMember.name" placeholder="Member Name" required>
+            <input type="text" ng-model="newMember.email" placeholder="Email" required>
+            <button type="submit">Add Member</button>
+        </form>
+        <ul>
+            <li ng-repeat="member in members">
+                <h3>{{ member.name }}</h3>
+                <p><strong>Email:</strong> {{ member.email }}</p>
+                <button class="edit-button" ng-click="editMember(member)">Edit</button>
+                <button ng-click="deleteMember(member)">Delete</button>
+            </li>
+        </ul>
+
+        <!-- Borrow/Return Management -->
+        <h2>Borrow/Return Books</h2>
+        <form ng-submit="borrowBook()">
+            <select ng-model="borrow.member" ng-options="member.name for member in members" required>
+                <option value="">Select Member</option>
+            </select>
+            <select ng-model="borrow.book" ng-options="book.title for book in books" required>
+                <option value="">Select Book</option>
+            </select>
+            <button type="submit">Borrow Book</button>
+        </form>
+        <ul>
+            <li ng-repeat="entry in borrowRecords">
+                <h3>{{ entry.book.title }}</h3>
+                <p><strong>Borrowed by:</strong> {{ entry.member.name }}</p>
+                <button ng-click="returnBook(entry)">Return Book</button>
+            </li>
+        </ul>
+
+        <!-- Edit Forms -->
+        <div ng-show="editingBook" id="editBookForm">
+            <h2>Edit Book</h2>
+            <form ng-submit="updateBook()">
+                <input type="text" ng-model="selectedBook.title" placeholder="Book Title" required>
+                <input type="text" ng-model="selectedBook.author" placeholder="Author" required>
+                <input type="number" ng-model="selectedBook.year" placeholder="Year" required>
+                <button type="submit">Update Book</button>
+                <button type="button" ng-click="cancelEditBook()">Cancel</button>
+            </form>
+        </div>
+
+        <div ng-show="editingMember" id="editMemberForm">
+            <h2>Edit Member</h2>
+            <form ng-submit="updateMember()">
+                <input type="text" ng-model="selectedMember.name" placeholder="Member Name" required>
+                <input type="text" ng-model="selectedMember.email" placeholder="Email" required>
+                <button type="submit">Update Member</button>
+                <button type="button" ng-click="cancelEditMember()">Cancel</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="ecommerceApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple E-commerce Site</title>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script> -->
+    <script src="node_modules/angular/angular.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .product {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin: 0;
+        }
+
+        .price {
+            font-weight: bold;
+            color: #008000;
+        }
+    </style>
+</head>
+<body ng-controller="ProductController" class="container">
+
+    <h1>Products</h1>
+
+    <div class="product" ng-repeat="product in products">
+        <h2>{{ product.name }}</h2>
+        <p>{{ product.description }}</p>
+        <p class="price">Price: {{ product.price | currency }}</p>
+    </div>
+
+    <script>
+        angular.module('ecommerceApp', [])
+        .controller('ProductController', function($scope) {
+            $scope.products = [
+                {
+                    name: 'Product 1',
+                    description: 'Description of Product 1',
+                    price: 19.99
+                },
+                {
+                    name: 'Product 2',
+                    description: 'Description of Product 2',
+                    price: 29.99
+                },
+                {
+                    name: 'Product 3',
+                    description: 'Description of Product 3',
+                    price: 39.99
+                }
+                // Add more products as needed
+            ];
+        });
+    </script>
+
+</body>
+</html>

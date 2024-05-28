@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="weatherApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast App</title>
+        <!-- <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script> -->
+        <script src="node_modules/angular/angular.min.js"></script>
+    <style>
+        /* Add your CSS styles here */
+    </style>
+</head>
+<body ng-controller="WeatherController">
+
+    <h1>Weather Forecast</h1>
+
+    <div ng-if="loading">Loading...</div>
+
+    <div ng-if="error">{{ error }}</div>
+
+    <div ng-if="!loading && !error">
+        <h2>{{ weatherData.city }}</h2>
+        <p>Current Temperature: {{ weatherData.temperature }}°C</p>
+        <p>Weather: {{ weatherData.weather }}</p>
+        <!-- Add more weather information here -->
+    </div>
+
+    <script>
+        angular.module('weatherApp', [])
+        .controller('WeatherController', function($scope, $http) {
+            $scope.loading = true;
+            const apiKey = 'db87835caefe744c049568e3e7e0d139';
+            const city = 'pune';
+    
+            $http.get(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`)
+                .then(function(response) {
+                    $scope.loading = false;
+                    $scope.weatherData = {
+                        city: response.data.name,
+                        temperature: response.data.main.temp,
+                        weather: response.data.weather[0].description
+                        // Add more data as needed
+                    };
+                })
+                .catch(function(error) {
+                    $scope.loading = false;
+                    $scope.error = 'Error fetching weather data.';
+                });
+        });
+    </script>
+    
+
+</body>
+</html>

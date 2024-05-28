@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html ng-app="financeApp">
+<head>
+    <title>Personal Finance Tracker</title>
+    <style>
+        /* styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 20px;
+}
+
+h1 {
+    color: #343a40;
+}
+
+form {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+}
+
+form div {
+    margin-bottom: 10px;
+}
+
+form input, form select {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+form span {
+    color: #dc3545;
+    font-size: 12px;
+}
+
+form button {
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+form button:disabled {
+    background-color: #6c757d;
+}
+
+form button:hover:enabled {
+    background-color: #0056b3;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    width: 100%;
+    max-width: 600px;
+}
+
+li {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    padding: 20px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button {
+    background-color: #dc3545;
+    color: #ffffff;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #c82333;
+}
+
+h2 {
+    color: #343a40;
+}
+
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script>
+        // app.js
+var app = angular.module('financeApp', []);
+
+app.controller('FinanceController', function($scope) {
+    $scope.transactions = [];
+    $scope.newTransaction = {};
+
+    // Add a new transaction
+    $scope.addTransaction = function() {
+        if ($scope.transactionForm.$valid) {
+            $scope.transactions.push(angular.copy($scope.newTransaction));
+            $scope.newTransaction = {};
+            $scope.transactionForm.$setPristine();
+            $scope.transactionForm.$setUntouched();
+        }
+    };
+
+    // Delete a transaction
+    $scope.deleteTransaction = function(transaction) {
+        var index = $scope.transactions.indexOf(transaction);
+        $scope.transactions.splice(index, 1);
+    };
+
+    // Calculate total income
+    $scope.getTotalIncome = function() {
+        return $scope.transactions
+            .filter(transaction => transaction.type === 'income')
+            .reduce((total, transaction) => total + transaction.amount, 0);
+    };
+
+    // Calculate total expense
+    $scope.getTotalExpense = function() {
+        return $scope.transactions
+            .filter(transaction => transaction.type === 'expense')
+            .reduce((total, transaction) => total + transaction.amount, 0);
+    };
+
+    // Calculate net balance
+    $scope.getNetBalance = function() {
+        return $scope.getTotalIncome() - $scope.getTotalExpense();
+    };
+});
+
+    </script>
+</head>
+<body>
+    <div ng-controller="FinanceController">
+        <h1>Personal Finance Tracker</h1>
+
+        <!-- Transaction Form -->
+        <form name="transactionForm" ng-submit="addTransaction()" novalidate>
+            <div>
+                <input type="text" name="description" ng-model="newTransaction.description" placeholder="Description" required>
+                <span ng-show="transactionForm.description.$touched && transactionForm.description.$invalid">Description is required.</span>
+            </div>
+            <div>
+                <input type="number" name="amount" ng-model="newTransaction.amount" placeholder="Amount" required>
+                <span ng-show="transactionForm.amount.$touched && transactionForm.amount.$invalid">Amount is required.</span>
+            </div>
+            <div>
+                <select ng-model="newTransaction.type" required>
+                    <option value="">Select Type</option>
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                </select>
+                <span ng-show="transactionForm.type.$touched && transactionForm.type.$invalid">Type is required.</span>
+            </div>
+            <button type="submit" ng-disabled="transactionForm.$invalid">Add Transaction</button>
+        </form>
+
+        <!-- Transaction List -->
+        <h2>Transactions</h2>
+        <ul>
+            <li ng-repeat="transaction in transactions">
+                <h3>{{ transaction.description }}</h3>
+                <p><strong>Amount:</strong> {{ transaction.amount | currency }}</p>
+                <p><strong>Type:</strong> {{ transaction.type }}</p>
+                <button ng-click="deleteTransaction(transaction)">Delete</button>
+            </li>
+        </ul>
+
+        <!-- Balance Summary -->
+        <h2>Summary</h2>
+        <p><strong>Total Income:</strong> {{ getTotalIncome() | currency }}</p>
+        <p><strong>Total Expense:</strong> {{ getTotalExpense() | currency }}</p>
+        <p><strong>Net Balance:</strong> {{ getNetBalance() | currency }}</p>
+    </div>
+</body>
+</html>

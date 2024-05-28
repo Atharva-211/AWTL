@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tip Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        
+        .calculator {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        
+        .calculator h1 {
+            margin-bottom: 20px;
+        }
+        
+        .calculator input, .calculator select, .calculator button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+        
+        .calculator button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .calculator button:hover {
+            background-color: #45a049;
+        }
+        
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>Tip Calculator</h1>
+        <input type="number" id="billAmount" placeholder="Bill Amount">
+        <select id="tipPercentage">
+            <option value="0.1">10%</option>
+            <option value="0.15">15%</option>
+            <option value="0.2">20%</option>
+            <option value="0.25">25%</option>
+        </select>
+        <input type="number" id="numberOfPeople" placeholder="Number of People">
+        <button onclick="calculateTip()">Calculate Tip</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function calculateTip() {
+            const billAmount = parseFloat(document.getElementById('billAmount').value);
+            const tipPercentage = parseFloat(document.getElementById('tipPercentage').value);
+            const numberOfPeople = parseInt(document.getElementById('numberOfPeople').value);
+
+            if (isNaN(billAmount) || isNaN(tipPercentage) || isNaN(numberOfPeople) || numberOfPeople <= 0) {
+                document.getElementById('result').textContent = 'Please enter valid inputs.';
+                return;
+            }
+
+            const tipAmount = billAmount * tipPercentage;
+            const totalAmount = billAmount + tipAmount;
+            const amountPerPerson = totalAmount / numberOfPeople;
+
+            document.getElementById('result').textContent = 
+                `Tip Amount: $${tipAmount.toFixed(2)}\n` + 
+                `Total Amount: $${totalAmount.toFixed(2)}\n` + 
+                `Amount Per Person: $${amountPerPerson.toFixed(2)}`;
+        }
+    </script>
+</body>
+</html>

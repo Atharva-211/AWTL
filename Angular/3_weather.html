@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .weather-info {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .weather-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .temperature {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .description {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .location {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="weather-info">
+            <div class="weather-icon" id="weather-icon"></div>
+            <div class="temperature" id="temperature"></div>
+            <div class="description" id="description"></div>
+            <div class="location" id="location"></div>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = 'db87835caefe744c049568e3e7e0d139';
+        const city = 'Goa';
+
+        fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`)
+            .then(response => response.json())
+            .then(data => {
+                const weatherIcon = data.weather[0].icon;
+                const temperature = Math.round(data.main.temp);
+                const description = data.weather[0].description;
+                const location = `${data.name}, ${data.sys.country}`;
+
+                document.getElementById('weather-icon').innerHTML = `<i class="wi wi-owm-${weatherIcon}"></i>`;
+                document.getElementById('temperature').textContent = `${temperature}°C`;
+                document.getElementById('description').textContent = description;
+                document.getElementById('location').textContent = location;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    </script>
+</body>
+</html>

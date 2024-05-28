@@ -1,0 +1,86 @@
+teaminfo (id, name, country, estYear)
+matchinfo (id, location, startTime, endTime, matchDate, teamId, oppositionTeamId, wonTeamId, umpireName, type)
+playerinfo (id, name, birthdate, joinedYear, retirementYear, playerRuns, playerWickets)
+matchplayedplayerinfo (matchid, teamid, playerid, playingAs)
+
+1 List names of the umpire when Indian team won 
+2 List names of the players who have not played single match. 
+3 Find batsman scored maximum runs and batsman scored minimum runs and display their names 
+4 Find bowler who has taken maximum wickets and bowler taken minimum wickets and display their names 
+5 List name of all players for given country and number of matches he has played 
+6 List names of the countries who played matches on given location 
+7 List team name and location of the matches they played 
+8 List names of teams who have never played any matches 
+9 List names of the countries and total matches they played 
+10 List name of team, and name of teams against which they played matches and count they won
+
+
+( 1 )
+SELECT umpireName
+FROM matchinfo
+WHERE wonTeamId = 1;
+
+( 2 )
+SELECT p.name 
+FROM playerinfo p
+LEFT JOIN matchplayedplayerinfo mp ON p.id = mp.playerid
+WHERE mp.playerid IS NULL;
+
+
+( 3 )
+SELECT name, playerRuns
+    FROM playerinfo
+    WHERE playerRuns = (SELECT MAX(playerRuns) FROM playerinfo)
+    OR playerRuns = (SELECT MIN(playerRuns) FROM playerinfo);
+
+( 4 )
+SELECT name, playerWickets
+    FROM playerinfo
+    WHERE playerWickets = (SELECT MAX(playerWickets) FROM playerinfo)
+    OR playerWickets = (SELECT MIN(playerWickets) FROM playerinfo);
+
+( 5 )
+SELECT playerinfo.name, COUNT(matchplayedplayerinfo.playerid) matches_played
+FROM matchplayedplayerinfo
+JOIN playerinfo ON matchplayedplayerinfo.playerid = playerinfo.id
+WHERE matchplayedplayerinfo.teamid = 1
+GROUP BY matchplayedplayerinfo.playerid;
+
+( 6 )
+SELECT country
+FROM teaminfo
+WHERE id IN ( SELECT teamId FROM matchinfo WHERE location = 'Wankhede Stadium'
+UNION 
+SELECT oppositionTeamId FROM matchinfo WHERE location = 'Wankhede Stadium');
+
+( 7 )
+SELECT teaminfo.name, matchinfo.location
+FROM teaminfo
+JOIN matchinfo ON teaminfo.id = matchinfo.teamId OR teaminfo.id = matchinfo.oppositionTeamId;
+
+( 8 )
+SELECT t.name
+FROM teaminfo t
+LEFT JOIN matchinfo m1 ON t.id = m1.teamId
+LEFT JOIN matchinfo m2 ON t.id = m2.oppositionTeamId
+WHERE m1.teamId IS NULL AND m2.oppositionTeamId IS NULL;
+
+OR
+
+SELECT name
+FROM teaminfo
+WHERE id NOT IN (SELECT DISTINCT teamId FROM matchinfo UNION SELECT DISTINCT oppositionTeamId FROM matchinfo);
+
+( 9 )
+SELECT teaminfo.country, COUNT(*) TotalMatchesPlayed
+FROM matchinfo
+JOIN teaminfo ON matchinfo.teamId = teaminfo.id OR matchinfo.oppositionTeamId = teaminfo.id
+GROUP BY teaminfo.country;
+
+( 10 )
+SELECT t1.name AS team_name, t2.name AS opposition_team_name, COUNT(m.id) AS matches_won
+FROM teaminfo t1
+JOIN matchinfo m ON t1.id = m.teamId OR t1.id = m.oppositionTeamId
+JOIN teaminfo t2 ON (t2.id = m.oppositionTeamId AND t1.id = m.teamId) OR (t2.id = m.teamId AND t1.id = m.oppositionTeamId)
+WHERE t1.id = m.wonTeamId
+GROUP BY t1.name, t2.name;

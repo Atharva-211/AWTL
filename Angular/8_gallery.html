@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Photographer's Gallery</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-gap: 10px;
+        }
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .gallery-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.3s;
+        }
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Photographer's Gallery</h1>
+        <div class="gallery">
+            <div class="gallery-item">
+                <img src="image1.jpg" alt="Image 1">
+            </div>
+            <div class="gallery-item">
+                <img src="image2.jpg" alt="Image 2">
+            </div>
+            <div class="gallery-item">
+                <img src="image3.jpg" alt="Image 3">
+            </div>
+            <!-- Add more gallery items as needed -->
+        </div>
+    </div>
+</body>
+</html>
